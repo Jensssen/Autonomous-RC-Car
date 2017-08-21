@@ -1,8 +1,8 @@
 import socket
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#s.bind(('192.168.178.30', 8000))
-s.bind(('127.0.0.1', 8000))
+s.bind(('192.168.1.45', 8000))
+#s.bind(('127.0.0.1', 8000))
 print("Lisstening for connections...")
 s.listen(1)
 
