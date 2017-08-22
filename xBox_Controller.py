@@ -1,5 +1,15 @@
 import pygame
- 
+import socket
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind(('192.168.178.30', 8000))
+#s.bind(('127.0.0.1', 8000))
+print("Lisstening for connections...")
+s.listen(1)
+connection, address = s.accept()
+print("Connected to client", address)
+
+
 # Define some colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -59,6 +69,7 @@ pygame.joystick.init()
 # Get ready to print
 textPrint = TextPrint()
  
+button_pressed = 0
 # -------- Main Program Loop -----------
 while not done:
     # EVENT PROCESSING STEP
@@ -69,8 +80,12 @@ while not done:
         # Possible joystick actions: JOYAXISMOTION JOYBALLMOTION JOYBUTTONDOWN
         # JOYBUTTONUP JOYHATMOTION
         if event.type == pygame.JOYBUTTONDOWN:
+            button_pressed = 1
             print("Joystick button pressed.")
         if event.type == pygame.JOYBUTTONUP:
+            button_pressed = 0
+            connection.send(("0 Buttons pressed").encode())
+
             print("Joystick button released.")
  
     # DRAWING STEP
@@ -106,6 +121,18 @@ while not done:
         for i in range(axes):
             axis = joystick.get_axis(i)
             textPrint.print(screen, "Axis {} value: {:>6.3f}".format(i, axis))
+            if i == 2 and axis > -0.1 and axis <-0.05:
+                connection.send(("Speed 0").encode())
+            if i == 2 and axis <= -0.1 and axis > -0.3:
+                connection.send(("Speed 1").encode())
+            if i == 2 and axis <= -0.3 and axis > -0.5:
+                connection.send(("Speed 2").encode())
+            if i == 2 and axis <= -0.5 and axis > -0.7:
+                connection.send(("Speed 3").encode())
+            if i == 2 and axis <= -0.7 and axis > -0.9:
+                connection.send(("Speed 4").encode())
+            if i == 2 and axis <= -0.9 and axis > -1:
+                connection.send(("Speed 5").encode())
         textPrint.unindent()
  
         buttons = joystick.get_numbuttons()
@@ -115,6 +142,14 @@ while not done:
         for i in range(buttons):
             button = joystick.get_button(i)
             textPrint.print(screen, "Button {:>2} value: {}".format(i, button))
+            if i == 0 and button == 1:
+                connection.send(("Button {:>2} value: {}".format('A', button)).encode())
+            if i == 1 and button == 1:
+                connection.send(("Button {:>2} value: {}".format('B', button)).encode())
+            if i == 2 and button == 1:
+                connection.send(("Button {:>2} value: {}".format('X', button)).encode())
+            if i == 3 and button == 1:
+                connection.send(("Button {:>2} value: {}".format('Y', button)).encode())
         textPrint.unindent()
  
         # Hat switch. All or nothing for direction, not like joysticks.
