@@ -2,8 +2,9 @@ import pygame
 import socket
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(('192.168.178.30', 8000))
-#s.bind(('127.0.0.1', 8000))
+#s.bind(('192.168.178.30', 8000)) #Adolf-Wagner Laptop
+s.bind(('192.168.2.67', 8000)) # Area51 pi
+#s.bind(('127.0.0.1', 8000)) #LocalHost
 print("Lisstening for connections...")
 s.listen(1)
 connection, address = s.accept()
@@ -14,6 +15,10 @@ print("Connected to client", address)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
  
+# Define some variables
+var_speed = 0
+speed = 0
+angle = 0
  
 class TextPrint(object):
     """
@@ -121,20 +126,75 @@ while not done:
         for i in range(axes):
             axis = joystick.get_axis(i)
             textPrint.print(screen, "Axis {} value: {:>6.3f}".format(i, axis))
-            if i == 2 and axis > -0.1 and axis <-0.05:
-                connection.send(("Speed 0").encode())
-            if i == 2 and axis <= -0.1 and axis > -0.3:
-                connection.send(("Speed 1").encode())
-            if i == 2 and axis <= -0.3 and axis > -0.5:
-                connection.send(("Speed 2").encode())
-            if i == 2 and axis <= -0.5 and axis > -0.7:
-                connection.send(("Speed 3").encode())
-            if i == 2 and axis <= -0.7 and axis > -0.9:
-                connection.send(("Speed 4").encode())
-            if i == 2 and axis <= -0.9 and axis > -1:
-                connection.send(("Speed 5").encode())
+            if var_speed == 0:
+                if i == 2 and axis > -0.1:
+                    speed = 0
+                    #connection.send(("Zero speed").encode())
+                if i == 2 and axis > -0.1 and axis <-0.05:
+                    speed = 0
+                    #connection.send(("Speed 0").encode())
+                if i == 2 and axis <= -0.1 and axis > -0.3:
+                    speed = 1
+                    #connection.send(("Speed 1").encode())
+                if i == 2 and axis <= -0.3 and axis > -0.5:
+                    speed = 2
+                    #connection.send(("Speed 2").encode())
+                if i == 2 and axis <= -0.5 and axis > -0.7:
+                    speed = 3
+                    #connection.send(("Speed 3").encode())
+                if i == 2 and axis <= -0.7 and axis > -0.9:
+                    speed = 4
+                    #connection.send(("Speed 4").encode())
+                if i == 2 and axis <= -0.9 and axis > -1:
+                    speed = 5
+            if var_speed == 1:
+                speed = 3
+                
+                
+                
+            if i == 0 and axis >= 0.9 and axis <= 1:
+                angle = -4                    
+            if i == 0 and axis >= 0.7 and axis < 0.9:
+                angle = -3                    
+            if i == 0 and axis >= 0.5 and axis < 0.7:
+                angle = -2
+            if i == 0 and axis >= 0.3 and axis < 0.5:
+                angle = -1
+            if i == 0 and axis >=0.1 and axis < 0.3:
+                angle = 0
+            if i == 0 and axis > -0.1 and axis < 0.1:
+                angle = 0
+            if i == 0 and axis <= -0.1 and axis > -0.3:
+                angle = 0
+            if i == 0 and axis <= -0.3 and axis > -0.5:
+                angle = 1
+            if i == 0 and axis <= -0.5 and axis > -0.7:
+                angle = 2
+            if i == 0 and axis <= -0.7 and axis > -0.9:
+                angle = 3
+            if i == 0 and axis <= -0.9 and axis >= -1:
+                angle = 4
+                    
+                    
+            """
+            if i == 0 and axis > 0.1 and axis <-0.05:
+                connection.send(("Angle 0").encode())
+            if i == 0 and axis <= 0.1 and axis > -0.3:
+                connection.send(("Angle 1").encode())
+            if i == 0 and axis <= 0.3 and axis > -0.5:
+                connection.send(("Angle 2").encode())
+            if i == 0 and axis <= 0.5 and axis > -0.7:
+                connection.send(("Angle 3").encode())
+            if i == 0 and axis <= 0.7 and axis > -0.9:
+                connection.send(("Angle 4").encode())
+            if i == 0 and axis <= 0.9 and axis > -1:
+                connection.send(("Angle 5").encode())
+                
+            """
+
         textPrint.unindent()
- 
+        connection.send(("Speed = "+str(speed)+" angle = "+str(angle)).encode())
+
         buttons = joystick.get_numbuttons()
         textPrint.print(screen, "Number of buttons: {}".format(buttons))
         textPrint.indent()
@@ -143,9 +203,9 @@ while not done:
             button = joystick.get_button(i)
             textPrint.print(screen, "Button {:>2} value: {}".format(i, button))
             if i == 0 and button == 1:
-                connection.send(("Button {:>2} value: {}".format('A', button)).encode())
+                var_speed = 1
             if i == 1 and button == 1:
-                connection.send(("Button {:>2} value: {}".format('B', button)).encode())
+                var_speed = 0
             if i == 2 and button == 1:
                 connection.send(("Button {:>2} value: {}".format('X', button)).encode())
             if i == 3 and button == 1:
@@ -164,7 +224,7 @@ while not done:
         textPrint.unindent()
  
         textPrint.unindent()
- 
+
     # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
  
     # Go ahead and update the screen with what we've drawn.
